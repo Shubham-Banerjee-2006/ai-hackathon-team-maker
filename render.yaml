@@ -1,0 +1,76 @@
+# Render Blueprint -- deploys the whole app from this one file.
+#
+# Usage:
+#   1. Push this repo to GitHub/GitLab.
+#   2. In the Render dashboard: New -> Blueprint -> select the repo.
+#   3. Render reads this file and creates both services below plus a
+#      persistent disk for the database. Fill in the two secret values
+#      it prompts for (ADMIN_BOOTSTRAP_PASSWORD, JWT_SECRET) and deploy.
+#   4. Share the "hackteam-frontend" service URL -- that's the one public
+#      link a judge needs. It talks to the backend service internally.
+#
+# Nothing here hardcodes localhost; every cross-service URL is wired
+# through Render's env var interpolation (fromService), so both services
+# discover each other automatically regardless of the URLs Render assigns.
+#
+# NOTE: Render's exact `fromService` property names/behavior can change --
+# verify against Render's current Blueprint docs before deploying. If
+# `hostport` doesn't come through as a full URL with scheme, set
+# BACKEND_URL manually in the dashboard as "http://<internal-hostport>"
+# (internal service-to-service traffic on Render is plain HTTP).
+
+services:
+  - type: web
+    name: hackteam-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+      # SQLite on a persistent disk is enough for hackathon scale and
+      # needs zero extra infrastructure. Swap DATABASE_URL for a Render
+      # Postgres connection string if you outgrow it.
+      - key: DATABASE_URL
+        value: sqlite:////data/hackteam.db
+      - key: ADMIN_BOOTSTRAP_USERNAME
+        value: admin
+      - key: ADMIN_BOOTSTRAP_PASSWORD
+        sync: false # set a real value in the Render dashboard, not in git
+      - key: JWT_SECRET
+        generateValue: true # Render generates and stores a strong random secret
+      - key: JWT_EXPIRES_MINUTES
+        value: "720"
+      - key: ANTHROPIC_API_KEY
+        sync: false # optional -- only needed for the AI explanation layer
+      - key: CORS_ORIGINS
+        fromService:
+          type: web
+          name: hackteam-frontend
+          property: hostport
+          # Render provides the frontend's own https URL as CORS_ORIGINS via
+          # the property below once both services exist; see note in README
+          # if this needs to be a full https:// origin instead of host:port.
+    disk:
+      name: hackteam-data
+      mountPath: /data
+      sizeGB: 1
+
+  - type: web
+    name: hackteam-frontend
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    plan: free
+    envVars:
+      # Tells the frontend's nginx where to proxy /api/* -- the backend's
+      # own Render URL, resolved automatically, no localhost anywhere.
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: hackteam-backend
+          property: hostport

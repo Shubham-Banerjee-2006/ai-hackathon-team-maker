@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#12151C" />
+    <meta name="description" content="AI Hackathon Team Maker — NLP-driven matching that builds balanced, complementary hackathon teams in seconds." />
+    <title>AI Hackathon Team Maker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-paper text-ink font-body antialiased">
+    <div id="root">
+      <div id="boot-splash" aria-hidden="true">
+        <div class="boot-mark">AI</div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
+    <style>
+      #boot-splash {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #EEF0EC;
+        z-index: 9999;
+      }
+      .boot-mark {
+        width: 44px;
+        height: 44px;
+        border-radius: 9999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 12px;
+        font-weight: 600;
+        color: #EEF0EC;
+        background: linear-gradient(135deg, #1F5C4C, #B08A2E);
+        animation: boot-pulse 1.1s ease-in-out infinite;
+      }
+      @keyframes boot-pulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(0.88); opacity: 0.75; }
+      }
+    </style>
+  </body>
+</html>
