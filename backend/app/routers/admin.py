@@ -18,7 +18,6 @@ from ..database import get_db
 from ..security import get_current_admin
 from ..utils import csv_to_list, list_to_csv, log_action
 
-
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
 
